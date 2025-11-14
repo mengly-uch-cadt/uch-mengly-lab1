@@ -40,3 +40,16 @@ jobs:
         with:
           name: coverage-${{ matrix.node-version }}
           path: coverage/**
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    # Only deploy on pushes to main, NOT on PRs
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Trigger Render deploy
+        run: curl "$RENDER_DEPLOY_HOOK_URL"
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
